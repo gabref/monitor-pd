@@ -1,0 +1,14 @@
+program Pix4Direto;
+
+uses
+  Vcl.Forms,
+  frmMain in 'frmMain.pas' {frmPix4};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TfrmPix4, frmPix4);
+  Application.Run;
+end.
