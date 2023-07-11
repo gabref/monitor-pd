@@ -3,27 +3,29 @@ unit pix4;
 interface
 
 uses
-  Windows, Registry, SysUtils, System.Classes, geradorComandos;
+  Windows, Registry, SysUtils, System.Classes, SyncObjs, geradorComandos,
+  Vcl.StdCtrls, Log, Pix4Communication;
 
 type
+
   TPix4 = class
 
   public
     {public fields}
-    const
-      HexDigits: array[0..15] of Char = '0123456789ABCDEF';
 
     {public methods}
     procedure LoadSerialPorts(items: TStrings);
-    function OpenSerialPort(const PortName: string): THandle;
-    procedure Disconnect(PortHandle: THandle);
-    function WriteData(PortHandle: THandle; const Data: TBytes): Boolean;
-    function ReadData(PortHandle: THandle; Count: Integer): TBytes;
-    function IOBterVersaoFirmware(PortHandle: THandle): Integer;
+    function OpenSerialPort(const ComPort: string): boolean;
+    procedure Disconnect;
+
+    function ObterVersaoFirmware: Integer;
+    function ObtemModelo: string;
+
   private
     {private fields}
-    {private methods}
+    hSerialPort : THandle;
 
+    {private methods}
   end;
 
 implementation
@@ -51,97 +53,54 @@ implementation
     end;
   end;
 
-function TPix4.OpenSerialPort(const PortName: string): THandle;
-var
-  PortHandle: THandle;
-  DCB: TDCB;
-  BaudRate: DWORD;
+function TPix4.OpenSerialPort(const ComPort: string): boolean;
 begin
-  BaudRate := 9600;
-  PortHandle := CreateFile(PChar(PortName), GENERIC_READ or GENERIC_WRITE, 0, nil, OPEN_EXISTING, 0, 0);
-  if PortHandle = INVALID_HANDLE_VALUE then
-    RaiseLastOSError;
-
-  // Get the current serial port settings
-  FillChar(DCB, SizeOf(DCB), 0);
-  DCB.DCBlength := SizeOf(DCB);
-  if not GetCommState(PortHandle, DCB) then
-  begin
-    CloseHandle(PortHandle);
-    RaiseLastOSError;
-  end;
-
-  // Update the baud rate
-  DCB.BaudRate := BaudRate;
-
-  // Apply the modified serial port settings
-  if not SetCommState(PortHandle, DCB) then
-  begin
-    CloseHandle(PortHandle);
-    RaiseLastOSError;
-  end;
-
-  Result := PortHandle;
+  hSerialPort := OpenPort(hSerialPort, ComPort);
+  if hSerialPort = INVALID_HANDLE_VALUE then
+     result := False
+  else
+    result := True;
 end;
 
-procedure TPix4.Disconnect(PortHandle: THandle);
+procedure TPix4.Disconnect;
 begin
-  CloseHandle(PortHandle);
+  CloseHandle(hSerialPort);
 end;
 
 
-function TPix4.WriteData(PortHandle: THandle; const Data: TBytes): Boolean;
-var
-  BytesWritten: DWORD;
-begin
-  Result := WriteFile(PortHandle, Data[0], Length(Data), BytesWritten, nil);
-  if not Result then begin
-    RaiseLastOSError;
-  end;
-end;
 
-function TPix4.ReadData(PortHandle: THandle; Count: Integer): TBytes;
+function TPix4.ObterVersaoFirmware: Integer;
 var
-  BytesRead: DWORD;
-  Buffer: array of Byte;
+  retorno: Boolean;
+  data: integer;
+  firmwareVersion: integer;
 begin
-  SetLength(Buffer, Count);
-  if not ReadFile(PortHandle, Buffer[0], Count, BytesRead, nil) then
-    RaiseLastOSError;
-
-  SetLength(Result, BytesRead);
-  Move(Buffer[0], Result[0], BytesRead);
-end;
-
-function BytesToHex(const Bytes: TBytes): string;
-var
-  I: Integer;
-begin
-  SetLength(Result, Length(Bytes) * 2);
-  for I := 0 to Length(Bytes) - 1 do
-    Result[(I * 2) + 1] := TPix4.HexDigits[(Bytes[I] shr 4) + 1];
-    Result[(I * 2) + 2] := TPix4.HexDigits[(Bytes[I] and $0F) + 1];
-  end;
-
-function TPix4.IOBterVersaoFirmware(PortHandle: THandle): Integer;
-var
-  retorno, ok: Boolean;
-  aux: Integer;
-  data: TBytes;
-begin
-  retorno := writeData(PortHandle, TGeradorComandos.GerarComandoObterVersaoFirmware);
+  retorno := WritePix4(hSerialPort, gerarComandoObterVersaoFirmware);
 
   if retorno then
   begin
-    data := readData(PortHandle, 4);
-    aux := StrToInt('$' + BytesToHex(data));
-    if aux <= 0 then
-      Result := -1
-    else
-      Result := aux;
+    data := ReadPix4Int(hSerialPort);
+    writeLogs('firmware Version: ' + IntToStr(data));
+    result := data;
   end
   else
     Result := -1;
+end;
+
+function TPix4.ObtemModelo: string;
+var
+  retorno: Boolean;
+  hexdata: string;
+begin
+  retorno := WritePix4(hSerialPort, gerarComandoObterModelo);
+
+  if retorno then
+  begin
+    hexdata := ReadPix4(hSerialPort);
+    result := hexdata;
+  end
+  else
+    Result := 'erro';
 end;
 
 end.

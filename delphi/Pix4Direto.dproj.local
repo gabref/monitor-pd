@@ -2,16 +2,21 @@
 <BorlandProject>
 	<Transactions>
     <Transaction>2023/06/19 15:10:38.000.998,=C:\Users\gabriel.franzeri.ELGIN\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
-    <Transaction>2023/06/19 15:11:45.000.609,C:\Users\gabriel.franzeri.ELGIN\Documents\Embarcadero\Studio\Projects\Unit1.dfm=C:\Users\gabriel.franzeri.ELGIN\Documents\Embarcadero\Studio\Projects\frmMain.dfm</Transaction>
     <Transaction>2023/06/19 15:11:45.000.609,C:\Users\gabriel.franzeri.ELGIN\Documents\Embarcadero\Studio\Projects\Unit1.pas=C:\Users\gabriel.franzeri.ELGIN\Documents\Embarcadero\Studio\Projects\frmMain.pas</Transaction>
+    <Transaction>2023/06/19 15:11:45.000.609,C:\Users\gabriel.franzeri.ELGIN\Documents\Embarcadero\Studio\Projects\Unit1.dfm=C:\Users\gabriel.franzeri.ELGIN\Documents\Embarcadero\Studio\Projects\frmMain.dfm</Transaction>
     <Transaction>2023/06/19 15:12:31.000.868,C:\Users\gabriel.franzeri.ELGIN\Documents\Embarcadero\Studio\Projects\Project1.dproj=C:\Users\gabriel.franzeri.ELGIN\Documents\Embarcadero\Studio\Projects\Pix4Direto.dproj</Transaction>
-    <Transaction>2023/06/19 15:13:08.000.398,C:\Users\gabriel.franzeri.ELGIN\Documents\Embarcadero\Studio\Projects\frmMain.dfm=D:\documents\business\tech\development\pix4-direto\ExemploPix4Direto\frmMain.dfm</Transaction>
     <Transaction>2023/06/19 15:13:08.000.398,C:\Users\gabriel.franzeri.ELGIN\Documents\Embarcadero\Studio\Projects\frmMain.pas=D:\documents\business\tech\development\pix4-direto\ExemploPix4Direto\frmMain.pas</Transaction>
+    <Transaction>2023/06/19 15:13:08.000.398,C:\Users\gabriel.franzeri.ELGIN\Documents\Embarcadero\Studio\Projects\frmMain.dfm=D:\documents\business\tech\development\pix4-direto\ExemploPix4Direto\frmMain.dfm</Transaction>
     <Transaction>2023/06/19 15:13:12.000.146,C:\Users\gabriel.franzeri.ELGIN\Documents\Embarcadero\Studio\Projects\Pix4Direto.dproj=D:\documents\business\tech\development\pix4-direto\ExemploPix4Direto\Pix4Direto.dproj</Transaction>
     <Transaction>2023/06/19 15:17:14.000.788,=D:\documents\business\tech\development\pix4-direto\ExemploPix4Direto\Unit1.pas</Transaction>
     <Transaction>2023/06/19 15:19:24.000.136,D:\documents\business\tech\development\pix4-direto\ExemploPix4Direto\Unit1.pas=D:\documents\business\tech\development\pix4-direto\ExemploPix4Direto\pix4.pas</Transaction>
     <Transaction>2023/07/05 11:40:50.000.050,=D:\documents\business\tech\development\pix4-direto\ExemploPix4Direto\Unit1.pas</Transaction>
     <Transaction>2023/07/05 14:01:21.000.907,=D:\documents\business\tech\development\pix4-direto\ExemploPix4Direto\Unit1.pas</Transaction>
     <Transaction>2023/07/05 14:01:38.000.061,D:\documents\business\tech\development\pix4-direto\ExemploPix4Direto\geradorComandos.pas=D:\documents\business\tech\development\pix4-direto\ExemploPix4Direto\Unit1.pas</Transaction>
+    <Transaction>2023/07/11 11:56:53.368,=D:\documents\business\tech\development\pix4-direto\monitor-PD35\delphi\Unit1.pas</Transaction>
+    <Transaction>2023/07/11 11:57:35.283,D:\documents\business\tech\development\pix4-direto\monitor-PD35\delphi\Pix4Communcation.pas=D:\documents\business\tech\development\pix4-direto\monitor-PD35\delphi\Unit1.pas</Transaction>
+    <Transaction>2023/07/11 12:09:39.187,=D:\documents\business\tech\development\pix4-direto\monitor-PD35\delphi\Unit1.pas</Transaction>
+    <Transaction>2023/07/11 12:09:50.503,D:\documents\business\tech\development\pix4-direto\monitor-PD35\delphi\Log.pas=D:\documents\business\tech\development\pix4-direto\monitor-PD35\delphi\Unit1.pas</Transaction>
+    <Transaction>2023/07/11 14:25:20.382,D:\documents\business\tech\development\pix4-direto\monitor-PD35\delphi\Pix4Communication.pas=D:\documents\business\tech\development\pix4-direto\monitor-PD35\delphi\Pix4Communcation.pas</Transaction>
   </Transactions>
 </BorlandProject>

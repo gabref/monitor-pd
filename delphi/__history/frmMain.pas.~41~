@@ -1,0 +1,111 @@
+unit frmMain;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Pix4, Pix4Communication, Registry, SyncObjs;
+
+type
+  TfrmPix4 = class(TForm)
+    Button1: TButton;
+    memoLogs: TMemo;
+    Button2: TButton;
+    Button3: TButton;
+    Button4: TButton;
+    Button5: TButton;
+    cmbPorts: TComboBox;
+    procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
+    procedure Button4Click(Sender: TObject);
+    procedure Button5Click(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    pix4 : tpix4;
+    pix4c : TPix4CommunicationThread;
+    PortHandle : THandle;
+  end;
+
+var
+  frmPix4: TfrmPix4;
+
+implementation
+
+{$R *.dfm}
+
+procedure TfrmPix4.Button1Click(Sender: TObject);
+var
+  portList : TStringList;
+  I: Integer;
+begin
+  memologs.Clear;
+  pix4 := tpix4.Create;
+  portList := TStringList.Create;
+  pix4.LoadSerialPorts(portList);
+  memoLogs.Lines.AddStrings(portList);
+  cmbPorts.Items.Clear; // Clear existing items in the ComboBox
+  for i := 0 to portList.Count - 1 do
+  begin
+    cmbPorts.Items.Add(portList[i]); // Add each item to the ComboBox
+  end;
+end;
+
+procedure TfrmPix4.Button2Click(Sender: TObject);
+begin
+  try
+    PortHandle := pix4.OpenSerialPort(cmbPorts.Text);
+    try
+      // connection opened successfully, do further operations...
+      ShowMessage('Connection opened');
+    finally
+      // close the connection
+      // CloseHandle(PortHandle);
+    end;
+  except on E: Exception do begin
+      Writeln('Failed to open COM port: ', E.Message);
+      ShowMessage('connection failed');
+    end;
+  end;
+end;
+
+procedure TfrmPix4.Button3Click(Sender: TObject);
+begin
+  Pix4.Disconnect(PortHandle);
+end;
+
+procedure TfrmPix4.Button4Click(Sender: TObject);
+var
+  temp : integer;
+begin
+  temp := Pix4.IOBterVersaoFirmware(PortHandle);
+  memoLogs.Lines.Add(inttoStr(temp));
+  showmessage(inttostr(temp));
+end;
+
+// -------------------------------------------------
+// -------------------------------------------------
+// -------------------------------------------------
+// -------------------------------------------------
+// -------------------------------------------------
+
+procedure TfrmPix4.Button5Click(Sender: TObject);
+var
+  ret : string;
+begin
+  pix4c := tpix4communicationthread.Create(cmbPorts.Text);
+  pix4c.OpenPort;
+  if not pix4c.WritePix4(pix4c.HexToByte('ciao')) then
+  begin
+    showmessage('didtn write to port, something went wrong');
+    exit;
+  end;
+
+  ret := pix4c.ReadPix4;
+  showmessage('read the pix4 info: ' + ret);
+
+end;
+
+end.

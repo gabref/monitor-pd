@@ -3,19 +3,28 @@ unit geradorComandos;
 interface
 
 uses
-  SysUtils;
+  SysUtils, pix4Communication;
 
-  type
-    TGeradorComandos = class
-    public
-      class function gerarComandoObterVersaoFirmware: TBytes; static;
-    end;
+  function gerarComandoObterVersaoFirmware: TBytes;
+  function gerarComandoObterModelo: TBytes;
 
 implementation
 
-class function TGeradorComandos.gerarComandoObterVersaoFirmware: TBytes;
+
+function gerarComandoObterVersaoFirmware: TBytes;
+var
+  hex: string;
 begin
-  Result := [$02, $07, $16, $02];
+  hex := '02 07 16 02';
+  Result := HexToByte(hex);
+end;
+
+function gerarComandoObterModelo: TBytes;
+var
+  hex: string;
+begin
+  hex := '02 07 16 01';
+  Result := HexToByte(hex);
 end;
 
 end.

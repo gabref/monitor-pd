@@ -1,0 +1,175 @@
+unit Pix4Communcation;
+
+(*
+  This Unit makes the actual communication with the Pix4 device.
+  Thread are used because of reading. For some reason when not using
+  threads to read from com serial port the program remains stuck.
+*)
+
+interface
+
+uses
+  Windows, System.Classes, System.SysUtils, Log;
+
+type
+
+  // This event type is used to pass back the completion of the reading task
+  TPix4CommunicationEvent = procedure(Sender: TObject; const Success: Boolean) of object;
+
+  // this is a dedicated thread class for the purpose of communicatin with the
+  // com serial port
+  TPix4CommunicationThread = class //(TThread)
+    private
+      FSuccess: Boolean; // used internally when synchronizing success
+      FOnFinished: TPix4CommunicationEvent;
+      FReceiveData: string;
+      FComPort: string;
+      hSerialPort: THandle;
+    protected
+      //procedure Execute; override;
+      procedure SYNC_OnFinished;
+    public
+      constructor Create(const ComPort: string); reintroduce;
+      destructor Destroy; override;
+      property OnFinished: TPix4CommunicationEvent read FOnFinished write FOnFinished;
+      property ReceiveData: string read FReceiveData;
+
+      function ToRun(): boolean;
+      function OpenPort(): boolean;
+      function HexToByte(hex: string): TBytes;
+      function WritePix4(bytesData: TBytes): Boolean;
+      function ReadPix4: string;
+  end;
+
+implementation
+
+function TPix4CommunicationThread.HexToByte(hex: string): TBytes;
+var
+  hexData: string;
+  bytesData: TBytes;
+begin
+  hexData := '02 07 16 01';
+  hexData := StringReplace(hexData, ' ', '', [rfReplaceAll]);
+  SetLength(bytesData, Length(hexData) div 2);
+  HexToBin(PChar(hexData), @bytesData[0], Length(bytesData));
+  result := bytesData;
+end;
+
+function TPix4CommunicationThread.WritePix4(bytesData: TBytes): boolean;
+var
+  bytesWritten: DWORD;
+begin
+  if not WriteFile(hSerialPort, bytesData[0], Length(bytesData), bytesWritten, nil) then
+  begin
+    writeLogs('Failed to write data to the serial port. Error: ' + IntToStr(GetLastError));
+    CloseHandle(hSerialPort);
+    result := False;
+    exit;
+  end;
+  result := True;
+end;
+
+function TPix4CommunicationThread.ReadPix4;
+var
+  hexData: string;
+  bytesRead: DWORD;
+  readBuffer: array[0..99] of Byte;
+begin
+  // read data from the serial port
+  if not ReadFile(hSerialPort, readBuffer, SizeOf(readBuffer), bytesRead, nil) then
+  begin
+    writeLogs('Failed to read data from the serial port. Error: ' + IntToStr(GetLastError));
+    CloseHandle(hSerialPort);
+    exit;
+  end;
+
+  writeLogs('Port was read, about to conver');
+  // convert received data to string
+  SetString(hexData, PAnsiChar(@readBuffer[0]), bytesRead * 2);
+  writeLogs(hexData);
+  CloseHandle(hSerialPort);
+end;
+
+function TPix4CommunicationThread.OpenPort;
+var
+  dcb: TDCB;
+  bytesData: TBytes;
+  timeouts: TCommTimeouts;
+begin
+  // open the serial connection
+  hSerialPort := CreateFile(
+    PChar(Format('\\.\%s', [FComPort])),
+    GENERIC_READ or GENERIC_WRITE,
+    0,
+    nil,
+    OPEN_EXISTING,
+    FILE_ATTRIBUTE_NORMAL,
+    0
+  );
+  if hSerialPort = INVALID_HANDLE_VALUE then
+  begin
+    writeLogs('Failed to open the serial port. Error: ' + IntToStr(GetLastError));
+    exit;
+  end;
+
+  // configure the serial port settings
+  FillChar(dcb, SizeOf(dcb), 0);
+  dcb.DCBlength := SizeOf(dcb);
+  if not GetCommState(hSerialPort, dcb) then
+  begin
+    writeLogs('Failed to retrieve serial port settings. Error: ' + IntToStr(GetLastError));
+    CloseHandle(hSerialPort);
+    exit;
+  end;
+  dcb.BaudRate := CBR_9600;
+  dcb.ByteSize := 8;
+  dcb.Parity := NOPARITY;
+  dcb.StopBits := ONESTOPBIT;
+  if not SetCommState(hSerialPort, dcb) then
+  begin
+    writeLogs('Failed to set serial port settings. Error: ' + IntToStr(GetLastError));
+    CloseHandle(hSerialPort);
+    exit;
+  end;
+
+  // set the timeouts for read operations
+  FillChar(timeouts, SizeOf(timeouts), 0);
+  timeouts.ReadIntervalTimeout := MAXDWORD;
+  timeouts.ReadTotalTimeoutMultiplier := 0;
+  timeouts.ReadTotalTimeoutConstant := 2000; // set a timeout in milliseconds
+  if not SetCommTimeouts(hSerialPort, timeouts) then
+  begin
+    writeLogs('Failed to set serial port timeouts. ERror: ' + IntToStr(GetLastError));
+    CloseHandle(hSerialPort);
+    exit;
+  end;
+end;
+
+{ Pix4CommunicationThread }
+
+constructor TPix4CommunicationThread.Create(const ComPort: string);
+begin
+  // inherited Create(True);
+  FComPort := ComPort;
+end;
+
+procedure TPix4CommunicationThread.Execute;
+begin
+  try
+    FSuccess := ToRun();
+  except
+    on E: Exception do begin
+      // TODO log errors
+    end;
+  end;
+
+  Synchronize(SYNC_OnFinished);
+end;
+
+procedure TPix4CommunicationThread.SYNC_OnFinished;
+begin
+  if Assigned(FOnFinished) then
+    FOnFinished(Self, FSuccess);
+end;
+
+end.

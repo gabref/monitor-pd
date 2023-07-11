@@ -59,11 +59,11 @@ object frmPix4: TfrmPix4
     OnClick = Button4Click
   end
   object Button5: TButton
-    Left = 184
-    Top = 160
-    Width = 97
-    Height = 113
-    Caption = 'testeee'
+    Left = 7
+    Top = 376
+    Width = 122
+    Height = 49
+    Caption = 'Obtem Modelo'
     TabOrder = 5
     OnClick = Button5Click
   end
@@ -74,5 +74,14 @@ object frmPix4: TfrmPix4
     Height = 21
     TabOrder = 6
     Text = 'Com ports Availables'
+  end
+  object Button6: TButton
+    Left = 160
+    Top = 320
+    Width = 121
+    Height = 57
+    Caption = 'testeee'
+    TabOrder = 7
+    OnClick = Button6Click
   end
 end
