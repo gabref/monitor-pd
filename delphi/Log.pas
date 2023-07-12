@@ -13,24 +13,24 @@ implementation
 //** This procedure just creates a new Logfile an appends when it was created **
 procedure CreateLogfile;
 var
-  T:TextFile;
-FN:String;
+  StreamWriter: TStreamWriter;
+  FileName: string;
 begin
-  // Getting the filename for the logfile (In this case the Filename is 'application-exename.log'
-  FN := ChangeFileExt(Application.Exename, '.log');
-  // Assigns Filename to variable F
-  AssignFile(T, FN);
-  // Rewrites the file F
-  Rewrite(T);
-  // Open file for appending
-  Append(T);
-  // Write text to Textfile F
-  WriteLn(T, sLineBreak);
-  WriteLn(T, 'This Logfile was created on ' + DateTimeToStr(Now));
-  WriteLn(T, sLineBreak);
-  WriteLn(T, '');
-  // finally close the file
-  CloseFile(T);
+  // Getting the filename for the logfile (In this case, the Filename is 'application-exename.log'
+  FileName := ChangeFileExt(Application.Exename, '.log');
+
+  // Create the TStreamWriter instance with ASCII encoding
+  StreamWriter := TStreamWriter.Create(FileName, False, TEncoding.ASCII);
+  try
+    // Write the log content
+    StreamWriter.WriteLine('');
+    StreamWriter.WriteLine('This Logfile was created on ' + DateTimeToStr(Now));
+    StreamWriter.WriteLine('');
+    StreamWriter.WriteLine('');
+  finally
+    // Free the TStreamWriter object
+    StreamWriter.Free;
+  end;
 end;
 
 // Procedure for appending a Message to an existing logfile with current Date and Time **
