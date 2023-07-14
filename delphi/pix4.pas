@@ -144,17 +144,26 @@ begin
 end;
 
 function TPix4.InicializarPIX4;
+var
+  ret : integer;
 begin
+  writeLogs('Entrando na function: InicializarPIX4');
   if assigned(produtos) then
     produtos.Free;
   produtos := TList<TPair<string, string>>.Create;
 
-  result := writePix4(hSerialPort, gerarComandoInicializador);
+  ret := writePix4(hSerialPort, gerarComandoInicializador);
+  writeLogs('Retorno InicializarPIX4: ' + IntToStr(ret));
+  result := ret
 end;
 
 function TPix4.Reinicializar;
+var
+  ret: integer;
 begin
-  result := writePix4(hSerialPort, gerarComandoRestart);
+  ret := writePix4(hSerialPort, gerarComandoRestart);
+  writeLogs('Retorno Reinicializar: ' + IntToStr(ret));
+  result := ret;
 end;
 
 function TPix4.ObterVersaoFirmware: Integer;
@@ -203,7 +212,10 @@ begin
 end;
 
 function TPix4.ApresentaImagem(const filename: string; posY, posX, tipo: Integer): Integer;
+var
+  ret : integer;
 begin
+  writeLogs('Entrando na função: ApresentaImagem');
   if tipo < 0 then
     tipo := 0;
   if tipo > 1 then
@@ -223,11 +235,16 @@ begin
     Exit;
   end;
 
-  Result := WritePix4(hSerialPort, gerarComandoApresentaImagem(filename, posY, posX, tipo));
+  ret := WritePix4(hSerialPort, gerarComandoApresentaImagem(filename, posY, posX, tipo));
+  writeLogs('Retorno ApresentaImagem: ' + IntToStr(ret));
+  Result := ret;
 end;
 
 function TPix4.ApresentaQRCode(const qrCode: string; tamanho, posY, posX: Integer): Integer;
+var
+  ret : integer;
 begin
+  writeLogs('Entrando na função: ApresentaQRCode');
   if (tamanho < 15) or (tamanho > 255) then
   begin
     writeLogs('Tamanho qrCode fora do especificado ' + IntToStr(tamanho));
@@ -249,13 +266,17 @@ begin
     Exit;
   end;
 
-  Result := WritePix4(hSerialPort, gerarComandoApresentarQRCode(qrCode, tamanho, posY, posX));
+  ret := WritePix4(hSerialPort, gerarComandoApresentarQRCode(qrCode, tamanho, posY, posX));
+  writeLogs('Retorno ApresentaQRCode: ' + IntToStr(ret));
+  result := ret;
 end;
 
 function TPix4.ApresentaTexto(const texto: string; idTexto, tamanho, posY, posX: Integer; const hexadecimal: PAnsiChar): Integer;
 var
   r, g, b: Byte;
+  ret : integer;
 begin
+  writeLogs('Entrando na função: ApresentaTexto');
   if ValidaHexadecimal(PAnsiChar(hexadecimal)) then
   begin
     r := StrToInt('$' + String(hexadecimal[2]) + String(hexadecimal[3]));
@@ -297,13 +318,16 @@ begin
     Exit;
   end;
 
-  Result := writePix4(hSerialPort, gerarComandoApresentarTexto(texto, idTexto, tamanho, posY, posX, r, g, b));
+  ret := writePix4(hSerialPort, gerarComandoApresentarTexto(texto, idTexto, tamanho, posY, posX, r, g, b));
+  writeLogs('Retorno ApresentaTexto: ' + IntToStr(ret));
+  result := ret;
 end;
 
 function TPix4.ObtemConexao: Boolean;
 var
   dcb: TDCB;
 begin
+  writeLogs('Entrando na função: ObtemConexao');
   Result := (hSerialPort <> INVALID_HANDLE_VALUE) and GetCommState(hSerialPort, dcb);
 end;
 
@@ -319,6 +343,7 @@ var
 label
   cabecalho;
 begin
+  writeLogs('Entrando na procedure: ApresentaListaCompras');
   if not ObtemConexao then
   begin
     writeLogs('Não foi possível concluir a operação, sem conexão com Hardware');
@@ -366,6 +391,8 @@ begin
   ApresentaTexto('────────────────────────────────', 19, 22, 400, 0, '#000000');
   ApresentaTexto('Quantidade : ' + IntToStr(quantidade), 17, 22, 420, 0, '#000000');
   ApresentaTexto('Valor Total: ' + FormatFloat('0.00', valorTotal), 18, 22, 450, 0, '#000000');
+
+  writeLogs('Retorno ApresentaListaCompras'); 
 end;
 
 function TPix4.UploadImagem(const filename, filePath: string): Integer;
@@ -377,6 +404,7 @@ var
   CRC16_file: Word;
   i: Integer;
 begin
+  writeLogs('Entrando na função: UploadImagem');
   if not ObtemConexao then
   begin
     writeLogs('Não foi possível concluir a operação, sem conexão com Hardware');
@@ -462,6 +490,7 @@ begin
   end;
 
   writeLogs('Upload concluído com sucesso');
+  writeLogs('Retorno UploadImagem: '); 
   Result := 0;
 end;
 
@@ -474,6 +503,7 @@ var
   chaves: TStringList;
   i: Integer;
 begin
+  writeLogs('Entrando na procedure: InicializaLayoutPagamento');
   if not ObtemConexao then
   begin
     writeLogs('Não foi possível concluir a operação, sem conexão com Hardware');
@@ -518,6 +548,8 @@ begin
   ApresentaTexto(separador, 7, 30, 158, 0, '#000000');
 
   chaves.Free;
+
+  writeLogs('Retorno InicializaLayoutPagamento: '); 
 end;
 
 function TPix4.AdicionaFormaPagamento(tipoPagamento: Integer; const valor: PAnsiChar): Integer;
@@ -525,6 +557,7 @@ var
   tipos: TStringList;
   descricao: string;
 begin
+  writeLogs('Entrando na função: AdicionaFormaPagamento');
   if not ObtemConexao then
   begin
     writeLogs('Não foi possível concluir a operação, sem conexão com Hardware');
@@ -582,6 +615,8 @@ begin
   end;
 
   tipos.Free;
+
+  writeLogs('Retorno AdicionaFormaPagamento: '); 
 end;
 
 
