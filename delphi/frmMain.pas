@@ -162,7 +162,7 @@ var
   ret : integer;
 begin
   if not CheckPix4 then exit;
-  ret := pix4.UploadImagem('p1.jpg', './p1.jpg');
+  ret := pix4.UploadImagem('imagemTeste', './p1.jpg');
   memoLogs.Lines.Add(IntToStr(ret));
 end;
 
@@ -171,7 +171,7 @@ var
   ret : integer;
 begin
   if not CheckPix4 then exit;
-  ret := pix4.ApresentaImagem('p1.jpg', 0, 0, 1);
+  ret := pix4.ApresentaImagem('imagemTeste', 0, 0, 1);
   memoLogs.Lines.Add(IntToStr(ret));
 end;
 

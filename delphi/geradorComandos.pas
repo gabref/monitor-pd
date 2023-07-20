@@ -23,7 +23,7 @@ function gerarComandoInicializador: TBytes;
 var
   hex: string;
 begin
-  hex := '27 64';
+  hex := '1b 40';
   Result := HexToByte(hex);
 end;
 
@@ -45,7 +45,7 @@ begin
     Byte(resolveHexa(posV, 2)),
     Byte(resolveHexa(posH, 1)),
     Byte(resolveHexa(posH, 2))];
-  Result := APRESENTA_IMAGEM + TEncoding.UTF8.GetBytes(filename) + [0];
+  Result := APRESENTA_IMAGEM + TEncoding.UTF8.GetBytes(filename) + HexToByte('00');
 end;
 
 function gerarComandoObterVersaoFirmware: TBytes;

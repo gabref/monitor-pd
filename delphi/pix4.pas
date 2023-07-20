@@ -464,9 +464,14 @@ begin
   writeLogs(dadosComando);
 
   writePix4(hSerialPort, gerarComandoUploadImagem(dadosComando));
-  aux := readPix4(hSerialPort);
 
-  if aux <> 'OK' then
+  i := 0;
+  repeat
+    aux := ReadPix4CharacterByCharacter(hSerialPort);
+    i := i + 1;
+  until (aux = 'OK.') or (i = 5);
+
+  if aux = 'OK.' then
   begin
     Sleep(100);
 

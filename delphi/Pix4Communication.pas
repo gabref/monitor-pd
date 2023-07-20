@@ -14,6 +14,7 @@ uses
   function WritePix4(hSerialPort: THandle; bytesData: TBytes): integer;
   function ReadPix4(hSerialPort: THandle): string;
   function ReadPix4Int(hSerialPort: THandle): integer;
+  function ReadPix4CharacterByCharacter(hSerialPort: THandle): string;
   function AddSpacesEveryTwo(const toAdd: string): string;
 
 const
@@ -84,7 +85,12 @@ var
   hexData: string;
   bytesRead: DWORD;
   readBuffer: array[0..255] of Byte;
+  errors: DWORD;
+  status: TCOMSTAT;
 begin
+  FillChar(status, SizeOf(status), 0);
+  ClearCommError(hSerialPort, errors, @status);
+
   // read data from the serial port
   if not ReadFile(hSerialPort, readBuffer, SizeOf(readBuffer), bytesRead, nil) then
   begin
@@ -138,10 +144,66 @@ begin
   Result := hexDataInt;
 end;
 
+function ReadPix4CharacterByCharacter(hSerialPort: THandle): string;
+var
+  i, j: integer;
+  hexData: string;
+  bytesRead: DWORD;
+  readBuffer: array[0..255] of Byte;
+  errors: DWORD;
+  status: TCOMSTAT;
+  toRead: Cardinal;
+  dotFound: boolean;
+begin
+  j := 0;
+  dotFound := False;
+  repeat
+    FillChar(status, SizeOf(status), 0);
+    ClearCommError(hSerialPort, errors, @status);
+
+    if status.cbInQue > 0 then
+      toRead := 1
+    else
+      toRead := 0;
+
+    // read data from the serial port
+    if not ReadFile(hSerialPort, readBuffer[j], toRead, bytesRead, nil) then
+    begin
+      writeLogs('Failed to read data from the serial port. Error: ' + IntToStr(GetLastError));
+      result := 'erro';
+      exit;
+    end;
+
+    if readBuffer[j] = $0A then // check for dot characters
+    begin
+      dotFound := True;
+      break;
+    end;
+    j := j + 1;
+
+  until (bytesRead = 0) or dotFound;
+
+  writeLogs('Port was read, about to convert');
+
+  // convert received bytes to hexadecimal string
+  hexData := '';
+  for i := 0 to j - 1 do
+    hexData := hexData + IntToHex(readBuffer[i], 2);
+  writeLogs(AddSpacesEveryTwo(hexData));
+
+  // convert received bytes to string ASCII encoding
+  SetString(hexData, PAnsiChar(@readBuffer[0]), bytesRead);
+
+  writeLogs(hexData);
+  result := hexData;
+end;
+
+
 function OpenPort(hSerialPort: THandle; ComPort: string): THandle;
 var
   dcb: TDCB;
   timeouts: TCommTimeouts;
+  errMsg: DWORD;
 begin
   // open the serial connection
   hSerialPort := CreateFile(
@@ -153,9 +215,39 @@ begin
     FILE_ATTRIBUTE_NORMAL,
     0
   );
+
+  // use win32 api to get last error. returns an integer error code. There are
+  // about 16.000 error codes, but we care about two (is device connected?, and
+  // is it already being used by another app?
+  errMsg := GetLastError;
+
+  // the win32 error code for ERROR_FILE_NOT_FOUND is DWORD 2
+  if errMsg = 2 then
+  begin
+    writeLogs('you need to, like, plug the device first');
+    result := hSerialPort;
+    exit;
+  end;
+
+  // the win32 error code for ERROR_ACCESS_DENIED is DWORD 5
+  if errMsg = 5 then
+  begin
+    writeLogs('another app is already using your device');
+    result := hSerialPort;
+    exit;
+  end;
+
   if hSerialPort = INVALID_HANDLE_VALUE then
   begin
     writeLogs('Failed to open the serial port. Error: ' + IntToStr(GetLastError));
+    result := hSerialPort;
+    exit;
+  end;
+
+  if errMsg <> 0 then
+  begin
+    writeLogs('Something went wrong opening the port. Check the win32 api ' +
+    'to get the meaning of the ErrorCode: ' + IntToStr(GetLastError));
     result := hSerialPort;
     exit;
   end;
