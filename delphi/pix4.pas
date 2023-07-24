@@ -170,7 +170,6 @@ function TPix4.ObterVersaoFirmware: Integer;
 var
   retorno: integer;
   data: integer;
-  firmwareVersion: integer;
 begin
   writeLogs('Entrando na função: ObterVersaoFirmware');
   retorno := WritePix4(hSerialPort, gerarComandoObterVersaoFirmware);
@@ -399,12 +398,12 @@ function TPix4.UploadImagem(const filename, filePath: string): Integer;
 var
   bytes: TBytes;
   bytesWritten: DWORD;
-  dadosComando, aux: string;
-  fileStream: TFileStream;
+  dadosComando, aux, ok: string;
   CRC16_file: Word;
   i: Integer;
 begin
   writeLogs('Entrando na função: UploadImagem');
+  ok := 'OK';
   if not ObtemConexao then
   begin
     writeLogs('Não foi possível concluir a operação, sem conexão com Hardware');
@@ -425,20 +424,6 @@ begin
       Exit;
   end;
 
-//  fileStream := TFileStream.Create(filePath, fmOpenRead or fmShareDenyWrite);
-//  try
-//    if fileStream.Size = 0 then
-//    begin
-//      writeLogs('O Arquivo não pode ser vazio ou nulo');
-//      Exit;
-//    end;
-//
-//    SetLength(bytes, fileStream.Size);
-//    fileStream.ReadBuffer(bytes[0], Length(bytes));
-//  finally
-//    fileStream.Free;
-//  end;
-
   try
     bytes := TFile.ReadAllBytes(filePath);
     writeLogs('Arquivo aberto com sucesso');
@@ -447,6 +432,7 @@ begin
     // clear the array
     SetLength(bytes, 0);
     writeLogs('Não foi possível ler o arquivo');
+    result := -1;
     exit;
   end;
 
@@ -468,13 +454,17 @@ begin
   i := 0;
   repeat
     aux := ReadPix4CharacterByCharacter(hSerialPort);
+    writeLogs('Realizando leitura ' + IntToStr(i) + ', recebido: ' + aux);
     i := i + 1;
-  until (aux = 'OK.') or (i = 5);
+  until (aux = ok) or (i = 5);
 
-  if aux = 'OK.' then
+  writeLogs('Fora do Loop, aux: ' + aux);
+
+  if aux = ok then
   begin
     Sleep(100);
 
+    writeLogs('Escrevendo bytes da imagem na porta serial');
     for i := 0 to Length(bytes) - 1 do
     begin
       if not WriteFile(hSerialPort, bytes[i], 1, bytesWritten, nil) then
@@ -490,8 +480,22 @@ begin
   end
   else
   begin
-    writeLogs('Não foi possível concluir a operação');
+    writeLogs('Não foi possível concluir a operação' + aux);
     Exit(-1);
+  end;
+
+  i := 0;
+  repeat
+    aux := ReadPix4CharacterByCharacter(hSerialPort);
+    writeLogs('Lendo crc16, tentativa: ' + IntToStr(i));
+    i := i + 1;
+  until (aux = IntToStr(CRC16_file)) or (i = 5);
+
+  if aux <> IntToStr(CRC16_file) then
+  begin
+    writeLogs('CRC16 retornado não bate com CRC16 real');
+    result := -1;
+    Exit;
   end;
 
   writeLogs('Upload concluído com sucesso');
@@ -502,7 +506,6 @@ end;
 procedure TPix4.InicializaLayoutPagamento(const subTotal, desconto, totalPagar: PAnsiChar);
 var
   cabecalho, separador, descricao: string;
-  resultValue: Integer;
   posicao, contador: Integer;
   valores: array [0..2] of PAnsiChar;
   chaves: TStringList;
@@ -544,7 +547,7 @@ begin
   for i := 0 to chaves.Count - 1 do
   begin
     descricao := Format('%-12s %-9s', [chaves[i], string(valores[i])]);
-    resultValue := ApresentaTexto(String(PAnsiChar(AnsiString(descricao))), contador, 23, posicao, 5, '#000000');
+    ApresentaTexto(String(PAnsiChar(AnsiString(descricao))), contador, 23, posicao, 5, '#000000');
     descricao := '';
     Inc(contador);
     Inc(posicao, 30);

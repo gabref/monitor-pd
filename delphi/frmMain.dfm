@@ -177,10 +177,18 @@ object frmPix4: TfrmPix4
   object Button1: TButton
     Left = 344
     Top = 281
-    Width = 113
+    Width = 121
     Height = 65
-    Caption = 'btnTeste'
+    Caption = 'Testa Arquivo Imagem'
     TabOrder = 17
     OnClick = Button1Click
+  end
+  object editImgName: TEdit
+    Left = 184
+    Top = 94
+    Width = 121
+    Height = 21
+    TabOrder = 18
+    Text = './p1.jpg'
   end
 end

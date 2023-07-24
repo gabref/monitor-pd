@@ -107,6 +107,8 @@ begin
     hexData := hexData + IntToHex(readBuffer[i], 2);
   writeLogs(AddSpacesEveryTwo(hexData));
 
+  writeLogs('bytesRead: ' + IntToStr(bytesRead));
+
   // convert received bytes to string ASCII encoding
   SetString(hexData, PAnsiChar(@readBuffer[0]), bytesRead);
 
@@ -157,6 +159,7 @@ var
 begin
   j := 0;
   dotFound := False;
+  writeLogs('Entrando na função: ReadPix4CharacterByCharacter.');
   repeat
     FillChar(status, SizeOf(status), 0);
     ClearCommError(hSerialPort, errors, @status);
@@ -174,8 +177,10 @@ begin
       exit;
     end;
 
+    writeLogs('readBuffer[' + IntToStr(j) + '] = ' + IntToHex(readBuffer[j]));
     if readBuffer[j] = $0A then // check for dot characters
     begin
+      writeLogs('check buffer');
       dotFound := True;
       break;
     end;
@@ -183,18 +188,21 @@ begin
 
   until (bytesRead = 0) or dotFound;
 
-  writeLogs('Port was read, about to convert');
+  writeLogs('Port was read byte by byte, about to convert');
 
   // convert received bytes to hexadecimal string
   hexData := '';
-  for i := 0 to j - 1 do
+  for i := 0 to j do
     hexData := hexData + IntToHex(readBuffer[i], 2);
-  writeLogs(AddSpacesEveryTwo(hexData));
+  writeLogs('hex: ' + AddSpacesEveryTwo(hexData));
+
+  writeLogs('bytesRead: ' + IntToStr(bytesRead));
+  writeLogs('j: ' + IntToStr(j));
 
   // convert received bytes to string ASCII encoding
-  SetString(hexData, PAnsiChar(@readBuffer[0]), bytesRead);
+  SetString(hexData, PAnsiChar(@readBuffer[0]), j);
 
-  writeLogs(hexData);
+  writeLogs('ascii: ' + hexData);
   result := hexData;
 end;
 

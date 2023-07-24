@@ -26,6 +26,7 @@ type
     btnAdicionaFormaPagamento: TButton;
     btnObtemConexao: TButton;
     Button1: TButton;
+    editImgName: TEdit;
     procedure btnLoadSerialPortsClick(Sender: TObject);
     procedure btnOpenConnectionClick(Sender: TObject);
     procedure btnCloseConnectionClick(Sender: TObject);
@@ -160,9 +161,11 @@ end;
 procedure TfrmPix4.btnCarregaImagemDisplayClick(Sender: TObject);
 var
   ret : integer;
+  imgName: string;
 begin
   if not CheckPix4 then exit;
-  ret := pix4.UploadImagem('imagemTeste', './p1.jpg');
+  imgName := editImgName.Text;
+  ret := pix4.UploadImagem('imagemTeste', imgName);
   memoLogs.Lines.Add(IntToStr(ret));
 end;
 
@@ -229,7 +232,7 @@ var
   filePath : string;
   size : int64;
 begin
-  filePath := './p1.jpg';
+  filePath := editImgName.Text;
   if not FileExists(filePath) then
   begin
     memoLogs.Lines.Add('no file');
