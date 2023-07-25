@@ -283,7 +283,7 @@ begin
       Exit;
   end;
 
-  memoLogs.Lines.Add('FUNFANDO');
+  memoLogs.Lines.Add('FUNCIONANDO');
 end;
 
 end.
