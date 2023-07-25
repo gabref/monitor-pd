@@ -82,6 +82,7 @@ begin
   if assigned(produtos) then
     produtos.Free;
   produtos := TList<TPair<string, string>>.Create;
+  writelogs('---');
 end;
 
 destructor TPix4.Destroy;
@@ -92,6 +93,7 @@ begin
     produtos.Free;
 
   inherited Destroy;
+  writelogs('---');
 end;
 
   procedure TPix4.LoadSerialPorts(items: TStrings);
@@ -119,6 +121,7 @@ end;
       RegIni.Free;
       AList.Free;
     end;
+    writelogs('---');
   end;
 
 function TPix4.OpenSerialPort(const ComPort: string): boolean;
@@ -135,6 +138,7 @@ begin
     writeLogs('Porta Aberta com sucesso');
      writeLogs('Retorno OpenSerialPort: True');
   end;
+  writelogs('---');
 end;
 
 procedure TPix4.DesconectarPix4;
@@ -155,6 +159,7 @@ begin
   ret := writePix4(hSerialPort, gerarComandoInicializador);
   writeLogs('Retorno InicializarPIX4: ' + IntToStr(ret));
   result := ret
+  writelogs('---');
 end;
 
 function TPix4.Reinicializar;
@@ -164,6 +169,7 @@ begin
   ret := writePix4(hSerialPort, gerarComandoRestart);
   writeLogs('Retorno Reinicializar: ' + IntToStr(ret));
   result := ret;
+  writelogs('---');
 end;
 
 function TPix4.ObterVersaoFirmware: Integer;
@@ -187,6 +193,7 @@ begin
   end;
 
   writeLogs('Retorno ObterVersaoFirmware: ' + IntToStr(data));
+  writelogs('---');
 end;
 
 function TPix4.ObtemModelo: string;
@@ -208,6 +215,7 @@ begin
     Result := hexData;
 
   writeLogs('Retorno ObtemModelo: ' + hexData);
+  writelogs('---');
 end;
 
 function TPix4.ApresentaImagem(const filename: string; posY, posX, tipo: Integer): Integer;
@@ -237,6 +245,7 @@ begin
   ret := WritePix4(hSerialPort, gerarComandoApresentaImagem(filename, posY, posX, tipo));
   writeLogs('Retorno ApresentaImagem: ' + IntToStr(ret));
   Result := ret;
+  writelogs('---');
 end;
 
 function TPix4.ApresentaQRCode(const qrCode: string; tamanho, posY, posX: Integer): Integer;
@@ -268,6 +277,7 @@ begin
   ret := WritePix4(hSerialPort, gerarComandoApresentarQRCode(qrCode, tamanho, posY, posX));
   writeLogs('Retorno ApresentaQRCode: ' + IntToStr(ret));
   result := ret;
+  writelogs('---');
 end;
 
 function TPix4.ApresentaTexto(const texto: string; idTexto, tamanho, posY, posX: Integer; const hexadecimal: PAnsiChar): Integer;
@@ -320,6 +330,7 @@ begin
   ret := writePix4(hSerialPort, gerarComandoApresentarTexto(texto, idTexto, tamanho, posY, posX, r, g, b));
   writeLogs('Retorno ApresentaTexto: ' + IntToStr(ret));
   result := ret;
+  writelogs('---');
 end;
 
 function TPix4.ObtemConexao: Boolean;
@@ -328,6 +339,7 @@ var
 begin
   writeLogs('Entrando na função: ObtemConexao');
   Result := (hSerialPort <> INVALID_HANDLE_VALUE) and GetCommState(hSerialPort, dcb);
+  writelogs('---');
 end;
 
 // -------------
@@ -392,6 +404,7 @@ begin
   ApresentaTexto('Valor Total: ' + FormatFloat('0.00', valorTotal), 18, 22, 450, 0, '#000000');
 
   writeLogs('Retorno ApresentaListaCompras'); 
+  writelogs('---');
 end;
 
 function TPix4.UploadImagem(const filename, filePath: string): Integer;
@@ -454,11 +467,8 @@ begin
   i := 0;
   repeat
     aux := ReadPix4CharacterByCharacter(hSerialPort);
-    writeLogs('Realizando leitura ' + IntToStr(i) + ', recebido: ' + aux);
     i := i + 1;
   until (aux = ok) or (i = 5);
-
-  writeLogs('Fora do Loop, aux: ' + aux);
 
   if aux = ok then
   begin
@@ -501,6 +511,8 @@ begin
   writeLogs('Upload concluído com sucesso');
   writeLogs('Retorno UploadImagem: '); 
   Result := 0;
+  writeLogs('Saindo da Função UploadImagem');
+  writelogs('---');
 end;
 
 procedure TPix4.InicializaLayoutPagamento(const subTotal, desconto, totalPagar: PAnsiChar);
@@ -625,6 +637,7 @@ begin
   tipos.Free;
 
   writeLogs('Retorno AdicionaFormaPagamento: '); 
+  writelogs('---');
 end;
 
 

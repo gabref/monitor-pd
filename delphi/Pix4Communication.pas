@@ -157,19 +157,21 @@ var
   toRead: Cardinal;
   dotFound: boolean;
 begin
+  writeLogs('Entrando na função: ReadPix4CharacterByCharacter.');
   j := 0;
   dotFound := False;
-  writeLogs('Entrando na função: ReadPix4CharacterByCharacter.');
   repeat
     FillChar(status, SizeOf(status), 0);
     ClearCommError(hSerialPort, errors, @status);
 
+    // check if serial port has info to read
     if status.cbInQue > 0 then
       toRead := 1
     else
       toRead := 0;
 
     // read data from the serial port
+    // read 1 byte from the port
     if not ReadFile(hSerialPort, readBuffer[j], toRead, bytesRead, nil) then
     begin
       writeLogs('Failed to read data from the serial port. Error: ' + IntToStr(GetLastError));
@@ -180,7 +182,6 @@ begin
     writeLogs('readBuffer[' + IntToStr(j) + '] = ' + IntToHex(readBuffer[j]));
     if readBuffer[j] = $0A then // check for dot characters
     begin
-      writeLogs('check buffer');
       dotFound := True;
       break;
     end;
@@ -196,14 +197,12 @@ begin
     hexData := hexData + IntToHex(readBuffer[i], 2);
   writeLogs('hex: ' + AddSpacesEveryTwo(hexData));
 
-  writeLogs('bytesRead: ' + IntToStr(bytesRead));
-  writeLogs('j: ' + IntToStr(j));
-
   // convert received bytes to string ASCII encoding
   SetString(hexData, PAnsiChar(@readBuffer[0]), j);
 
   writeLogs('ascii: ' + hexData);
   result := hexData;
+  writeLogs('Saindo da função ReadPix4CharacterByCharacter');
 end;
 
 

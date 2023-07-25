@@ -51,10 +51,16 @@ begin
 
   // Assigns Filename to variable F
   AssignFile(T, FN);
+
   // start appending text
   Append(T);
+
   //Write a new line with current date and message to the file
-  WriteLn(T, DateTimeToStr(Now) + ': ' + data);
+  if data <> '---' then
+    WriteLn(T, DateTimeToStr(Now) + ': ' + data)
+  else
+    WriteLn(T, '');
+
   // Close file
   CloseFile(T)
 end;
