@@ -189,6 +189,6 @@ object frmPix4: TfrmPix4
     Width = 121
     Height = 21
     TabOrder = 18
-    Text = './p1.jpg'
+    Text = './images/p1.jpg'
   end
 end

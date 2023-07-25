@@ -158,7 +158,7 @@ begin
 
   ret := writePix4(hSerialPort, gerarComandoInicializador);
   writeLogs('Retorno InicializarPIX4: ' + IntToStr(ret));
-  result := ret
+  result := ret;
   writelogs('---');
 end;
 
@@ -553,7 +553,7 @@ begin
   chaves.Add('Descontos');
   chaves.Add('Total-Pagar');
 
-  posicao := 40;
+  posicao := 60;
   contador := 3;
 
   for i := 0 to chaves.Count - 1 do
